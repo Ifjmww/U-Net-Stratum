@@ -21,8 +21,7 @@ def get_flops(args, model):
     from ptflops import get_model_complexity_info
     save_stdout = sys.stdout
     sys.stdout = open('./trash', 'w')
-    macs, params = get_model_complexity_info(model, (1, 256, 256), as_strings=False,
-                                             print_per_layer_stat=False, verbose=False)
+    macs, params = get_model_complexity_info(model, (1, 256, 256), as_strings=False, print_per_layer_stat=False, verbose=False)
     sys.stdout = save_stdout
     print("macs: %.4f x 10^9, num params: %.4f x 10^6" % (float(macs) * 1e-9, float(params) * 1e-6))
     return macs, params
@@ -50,17 +49,6 @@ def display(args, length):
         x = np.reshape(x, (x.shape[1], x.shape[2]))
         y = np.load(y_path)
 
-        # output = np.zeros((seg.shape[1], seg.shape[2]))
-        #
-        # for i in range(seg.shape[1]):
-        #     for j in range(seg.shape[2]):
-        #         maxItem = seg[0, i, j]
-        #         max_index = 0
-        #         for k in range(seg.shape[0]):
-        #             if seg[k, i, j] > maxItem:
-        #                 max_index = k
-        #         output[i, j] = max_index
-
         output = seg.argmax(axis=0)
 
         plt.figure(figsize=(50, 50))
@@ -83,7 +71,7 @@ def display(args, length):
 
 
 def splicing(args):
-    #
+    # 将预测出的图片拼在一起
     print('Splicing segmentations...')
     if not os.path.exists(args.prediction_data + "pred_result"):
         os.mkdir(args.prediction_data + "pred_result")

@@ -1,13 +1,12 @@
 from torch.utils.data import DataLoader
-from torch.nn import  CrossEntropyLoss
+from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
 from torch.optim.lr_scheduler import LambdaLR
 from tqdm import tqdm
 from .metrics import *
 from .dataloader import UNetDataset
-from .model import UNet
+from .u_net_model import UNet
 from .tools import *
-
 
 device = torch.device('cuda:0')
 
@@ -45,7 +44,6 @@ def train(args):
         # training
         model.train()
         for step, (x, y) in enumerate(tqdm(train_loader, desc='[TRAIN] Epoch ' + str(epoch + 1) + '/' + str(args.epochs))):
-
             x = x.to(device).float()
             y = y.to(device).float()
 
@@ -83,7 +81,6 @@ def train(args):
         model.eval()
         with torch.no_grad():
             for step, (x, y) in enumerate(tqdm(test_loader, desc='[VAL] Epoch ' + str(epoch + 1) + '/' + str(args.epochs))):
-
                 x = x.to(device).float()
                 y = y.to(device).float()
 
@@ -120,7 +117,6 @@ def train(args):
 
 
 def evaluate(args):
-
     test_set = UNetDataset(args.valid_data, args.valid_dataset)
     test_loader = DataLoader(dataset=test_set, batch_size=args.batch_size, shuffle=False, num_workers=0, drop_last=True, pin_memory=True)
 
@@ -206,8 +202,7 @@ def evaluate(args):
                 count += 1
 
         print("segmentation results have been saved!!!")
-        # display函数，将保存的结果可视化
-        ########################################################################################
+        # display函数，保存结果&结果可视化
         display(args, len(test_loader))
         print("===========================================")
         print("display have been finished!!!")
@@ -215,8 +210,7 @@ def evaluate(args):
 
 def prediction(args):
     pred_set = UNetDataset(args.prediction_data, args.pred_dataset)
-    pred_loader = DataLoader(dataset=pred_set, batch_size=args.batch_size, shuffle=False, num_workers=0, drop_last=True,
-                             pin_memory=True)
+    pred_loader = DataLoader(dataset=pred_set, batch_size=args.batch_size, shuffle=False, num_workers=0, drop_last=True, pin_memory=True)
 
     if args.model_path is None:
         integrate = '_int' if args.integrate else ''
@@ -225,12 +219,9 @@ def prediction(args):
         model_path = "checkpoints/" + args.exp + "/" + cpt_name
     else:
         model_path = args.model_path
+
     print('Restoring model from path: ' + model_path)
-    model = UNet(iterations=args.iter,
-                   num_classes=args.num_class,
-                   num_layers=4,
-                   multiplier=args.multiplier,
-                   integrate=args.integrate).to(device)
+    model = UNet(iterations=args.iter, num_classes=args.num_class, num_layers=4, multiplier=args.multiplier, integrate=args.integrate).to(device)
     checkpoint = torch.load(model_path)
     model.load_state_dict(checkpoint['state_dict'])
     # 加载参数
@@ -274,11 +265,6 @@ def prediction(args):
                 count += 1
 
         print("segmentation results have been saved!!!")
-
     splicing(args)
 
-
 # =====================================================================================================================
-
-
-
