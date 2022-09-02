@@ -1,4 +1,5 @@
 import os
+import time
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -53,8 +54,13 @@ def main(args, CORE):
         CORE.prediction(args)
         exit()
     if not args.evaluate_only:
+        time_start = time.time()
         CORE.train(args)
+        time_end = time.time()
+        time_sum = time_end - time_start
+        print("===========TIME==========", time_sum, "===========TIME==========")
     CORE.evaluate(args)
+    print("====================================")
 
 
 if __name__ == '__main__':
