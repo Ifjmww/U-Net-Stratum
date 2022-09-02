@@ -3,6 +3,7 @@ from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
 from torch.optim.lr_scheduler import LambdaLR
 from tqdm import tqdm
+from torchsummary import summary
 from .metrics import *
 from .dataloader import UNetDataset
 from .u_net_model import UNet
@@ -173,6 +174,7 @@ def evaluate(args):
     print('Validation loss:\t', val_loss)
     print('Validation  iou:\t', val_iou)
 
+    summary(model, input_size=(1, 256, 256))
     macs, params = get_flops(args, model)
     print('\nEvaluation finished!')
 

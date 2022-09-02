@@ -1,4 +1,4 @@
-from torch.nn import Module, Sequential, Conv2d, BatchNorm2d, ConvTranspose2d, ReLU, MaxPool2d, Sigmoid, Parameter, Softmax
+from torch.nn import Module, Sequential, Conv2d, BatchNorm2d, ConvTranspose2d, ReLU, MaxPool2d, Sigmoid, Parameter, Softmax, Upsample
 from torch import tensor, cat
 
 
@@ -29,8 +29,9 @@ class UnConv(Module):
         self.out_channel = out_channel
         self.batch_norm_momentum = batch_norm_momentum
 
-        self.unconv = ConvTranspose2d(self.in_channel, self.in_channel, kernel_size=(3, 3), padding=(1, 1), stride=(2, 2), output_padding=(1, 1))
-        self.conv = Conv2d(self.in_channel, self.out_channel, kernel_size=(2, 2), padding=(1, 1), stride=(1, 1))
+        # self.unconv = ConvTranspose2d(self.in_channel, self.in_channel, kernel_size=(3, 3), padding=(1, 1), stride=(2, 2), output_padding=(1, 1))
+        self.unconv = Upsample(scale_factor=2, mode='bilinear', align_corners=True)
+        self.conv = Conv2d(self.in_channel, self.out_channel, kernel_size=(3, 3), padding=(1, 1), stride=(1, 1))
         self.relu = ReLU()
         self.batchnorm = BatchNorm2d(self.out_channel, momentum=self.batch_norm_momentum)
 
@@ -102,16 +103,18 @@ class UNet(Module):
         middle = self.middle(pool4)
 
         unconv1 = self.unconv1(middle)
-        up4 = self.up4(cat(conv4, unconv1))
-
+        up4 = self.up4(cat((conv4, unconv1), dim=1))
+        # print(unconv1.shape)
+        # print(conv4.shape)
+        # exit()
         unconv2 = self.unconv2(up4)
-        up3 = self.up3(cat(conv3, unconv2))
+        up3 = self.up3(cat((conv3, unconv2), dim=1))
 
         unconv3 = self.unconv3(up3)
-        up2 = self.up2(cat(conv2, unconv3))
+        up2 = self.up2(cat((conv2, unconv3), dim=1))
 
         unconv4 = self.unconv4(up2)
-        up1 = self.up1(cat(conv1, unconv4))
+        up1 = self.up1(cat((conv1, unconv4), dim=1))
 
         post = self.post(up1)
         output = self.output(post)
