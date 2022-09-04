@@ -1,6 +1,8 @@
 from torch.utils.data import DataLoader
 from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
+
+from torch import optim
 from torch.optim.lr_scheduler import LambdaLR
 from tqdm import tqdm
 from torchsummary import summary
@@ -16,16 +18,20 @@ def train(args):
     train_set = UNetDataset(args.train_data, 'Stratum', batchsize=args.batch_size, transforms=None)
     test_set = UNetDataset(args.valid_data, args.valid_dataset)
 
-    train_loader = DataLoader(dataset=train_set, batch_size=args.batch_size, shuffle=False, drop_last=True, num_workers=0, pin_memory=True)
-    test_loader = DataLoader(dataset=test_set, batch_size=args.batch_size, shuffle=False, num_workers=0, drop_last=True, pin_memory=True)
+    train_loader = DataLoader(dataset=train_set, batch_size=args.batch_size, shuffle=True, drop_last=True,
+                              num_workers=0, pin_memory=True)
+    test_loader = DataLoader(dataset=test_set, batch_size=args.batch_size, shuffle=True, num_workers=0, drop_last=True,
+                             pin_memory=True)
 
     # create model
-    model = UNet(iterations=args.iter, num_classes=args.num_class, num_layers=4, multiplier=args.multiplier, integrate=args.integrate).to(device).float()
+    # model = UNet(iterations=args.iter, num_classes=args.num_class, num_layers=4, multiplier=args.multiplier, integrate=args.integrate).to(device).float()
+    model = UNet(n_channels=1, n_classes=args.num_class).to(device)
     criterion = CrossEntropyLoss()
     optimizer = Adam(params=model.parameters(), lr=args.lr, weight_decay=0.)
 
     fcn = lambda step: 1. / (1. + args.lr_decay * step)
     scheduler = LambdaLR(optimizer, lr_lambda=fcn)
+    # scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.8)
 
     print('model successfully built and compiled.')
 
@@ -44,16 +50,17 @@ def train(args):
 
         # training
         model.train()
-        for step, (x, y) in enumerate(tqdm(train_loader, desc='[TRAIN] Epoch ' + str(epoch + 1) + '/' + str(args.epochs))):
+        for step, (x, y) in enumerate(
+                tqdm(train_loader, desc='[TRAIN] Epoch ' + str(epoch + 1) + '/' + str(args.epochs))):
             x = x.to(device).float()
             y = y.to(device).float()
 
             optimizer.zero_grad()
             output = model(x)
-
             # loss
             l = criterion(output, y.long())
             tot_loss += l.item()
+
             l.backward()
 
             optimizer.step()
@@ -64,7 +71,7 @@ def train(args):
 
             tot_iou += iou_score
             # 学习率更新
-            scheduler.step()
+        scheduler.step()
 
         print('[TRAIN] Epoch: ' + str(epoch + 1) + '/' + str(args.epochs),
               'loss:', tot_loss / len(train_loader),
@@ -81,7 +88,8 @@ def train(args):
         # validation
         model.eval()
         with torch.no_grad():
-            for step, (x, y) in enumerate(tqdm(test_loader, desc='[VAL] Epoch ' + str(epoch + 1) + '/' + str(args.epochs))):
+            for step, (x, y) in enumerate(
+                    tqdm(test_loader, desc='[VAL] Epoch ' + str(epoch + 1) + '/' + str(args.epochs))):
                 x = x.to(device).float()
                 y = y.to(device).float()
 
@@ -96,7 +104,7 @@ def train(args):
                 iou_score = miou(y, x, args.num_class)
                 val_iou += iou_score
 
-        if val_iou / len(test_loader) > best_iou:
+        if val_iou / len(test_loader) >= best_iou:
             best_iou = val_iou / len(test_loader)
             save_model(args, model)
             # 存下来的是最好的模型
@@ -119,7 +127,8 @@ def train(args):
 
 def evaluate(args):
     test_set = UNetDataset(args.valid_data, args.valid_dataset)
-    test_loader = DataLoader(dataset=test_set, batch_size=args.batch_size, shuffle=False, num_workers=0, drop_last=True, pin_memory=True)
+    test_loader = DataLoader(dataset=test_set, batch_size=args.batch_size, shuffle=False, num_workers=0, drop_last=True,
+                             pin_memory=True)
 
     if args.model_path is None:
         integrate = '_int' if args.integrate else ''
@@ -129,7 +138,9 @@ def evaluate(args):
     else:
         model_path = args.model_path
     print('Restoring model from path: ' + model_path)
-    model = UNet(iterations=args.iter, num_classes=args.num_class, num_layers=4, multiplier=args.multiplier, integrate=args.integrate).to(device)
+    # model = UNet(iterations=args.iter, num_classes=args.num_class, num_layers=4, multiplier=args.multiplier,
+    #              integrate=args.integrate).to(device)
+    model = UNet(n_channels=1, n_classes=args.num_class).to(device)
     checkpoint = torch.load(model_path)
     model.load_state_dict(checkpoint['state_dict'])
     # 加载参数
@@ -174,7 +185,7 @@ def evaluate(args):
     print('Validation loss:\t', val_loss)
     print('Validation  iou:\t', val_iou)
 
-    summary(model, input_size=(1, 256, 256))
+    # summary(model, input_size=(1, 256, 256))
     macs, params = get_flops(args, model)
     print('\nEvaluation finished!')
 
@@ -212,7 +223,8 @@ def evaluate(args):
 
 def prediction(args):
     pred_set = UNetDataset(args.prediction_data, args.pred_dataset)
-    pred_loader = DataLoader(dataset=pred_set, batch_size=args.batch_size, shuffle=False, num_workers=0, drop_last=True, pin_memory=True)
+    pred_loader = DataLoader(dataset=pred_set, batch_size=args.batch_size, shuffle=False, num_workers=0, drop_last=True,
+                             pin_memory=True)
 
     if args.model_path is None:
         integrate = '_int' if args.integrate else ''
@@ -223,7 +235,9 @@ def prediction(args):
         model_path = args.model_path
 
     print('Restoring model from path: ' + model_path)
-    model = UNet(iterations=args.iter, num_classes=args.num_class, num_layers=4, multiplier=args.multiplier, integrate=args.integrate).to(device)
+    # model = UNet(iterations=args.iter, num_classes=args.num_class, num_layers=4, multiplier=args.multiplier,
+    #              integrate=args.integrate).to(device)
+    model = UNet(n_channels=1, n_classes=args.num_class).to(device)
     checkpoint = torch.load(model_path)
     model.load_state_dict(checkpoint['state_dict'])
     # 加载参数

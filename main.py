@@ -1,5 +1,7 @@
 import os
 import time
+import warnings
+warnings.filterwarnings('ignore')
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -8,7 +10,7 @@ import importlib
 
 
 def argparsing():
-    parser = argparse.ArgumentParser(description='BiO-Net')
+    parser = argparse.ArgumentParser(description='U-Net')
     parser.add_argument('--epochs', default=100, type=int, help='trining epochs')
     parser.add_argument('--batch_size', default=5, type=int, help='batch size')
     parser.add_argument('--steps', default=500, type=int, help='steps per epoch')
