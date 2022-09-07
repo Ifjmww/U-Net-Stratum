@@ -295,8 +295,8 @@ def prediction(args):
 
             label = Image.open(label_path)
             y = np.array(label)
-            plt.imshow(y)
-            plt.show()
+            # plt.imshow(y)
+            # plt.show()
             mIoU[count] = miou(y, result, args, args.num_class)
             print("prediction mIoU: ", mIoU[count])
         count += 1
