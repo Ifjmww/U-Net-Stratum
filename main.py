@@ -13,6 +13,7 @@ def argparsing():
     parser = argparse.ArgumentParser(description='U-Net')
     parser.add_argument('--epochs', default=100, type=int, help='trining epochs')
     parser.add_argument('--batch_size', default=5, type=int, help='batch size')
+    parser.add_argument('--batch_size_pred', default=1, type=int, help='batch size')
     parser.add_argument('--steps', default=500, type=int, help='steps per epoch')
     parser.add_argument('--lr', default=0.0001, type=float, help='learning rate')
     parser.add_argument('--lr_decay', default=3e-5, type=float, help='learning rate decay')

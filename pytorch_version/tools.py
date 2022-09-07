@@ -70,17 +70,17 @@ def display(args, length):
         # plt.show()
 
 
-def splicing(args):
+def splicing(filename, types, args):
     # 将预测出的图片拼在一起
     print('Splicing segmentations...')
-    if not os.path.exists(args.prediction_data + "pred_result"):
-        os.mkdir(args.prediction_data + "pred_result")
+    if not os.path.exists('./checkpoints/' + args.exp + '/pred/'):
+        os.mkdir('./checkpoints/' + args.exp + '/pred/')
 
     crossline_crop_size = (58, 25, 709, 487)
     inline_crop_size = (36, 25, 987, 487)
-    file_path = args.prediction_data + "pred_result"
-
-    if args.pred_dataset == 'crossline':
+    file_path = './checkpoints/' + args.exp + '/pred/' + filename + '/seg/'
+    save_path = './checkpoints/' + args.exp + '/pred/'
+    if types == 'crossline':
         dir_list = os.listdir(file_path)
         print(dir_list)
 
@@ -126,9 +126,9 @@ def splicing(args):
         x_img = Image.fromarray(np.uint8(x_cat))
         x_crop = x_img.crop(crossline_crop_size)
         x_cat = np.array(x_crop)
-        np.save(file_path + "/result.npy", x_cat)
+        np.save(save_path + filename + ".npy", x_cat)
         plt.imshow(x_cat)
-        plt.savefig(file_path + "/result.png")
+        plt.savefig(save_path + filename + ".png")
 
     else:
         dir_list = os.listdir(file_path)
@@ -187,7 +187,9 @@ def splicing(args):
         x_img = Image.fromarray(np.uint8(x_cat))
         x_crop = x_img.crop(inline_crop_size)
         x_cat = np.array(x_crop)
-        np.save(file_path + "/result.npy", x_cat)
+        np.save(save_path + filename + ".npy", x_cat)
         plt.imshow(x_cat)
-        plt.savefig(file_path + "/result.png")
+        plt.savefig(save_path + filename + ".png")
+
     print("Splicing finished!!!")
+    return x_cat

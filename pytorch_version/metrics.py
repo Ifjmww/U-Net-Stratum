@@ -2,11 +2,14 @@ import numpy as np
 from sklearn.metrics import confusion_matrix
 
 
-def miou(y_true, y_pred, num_class=10):
+def miou(y_true, y_pred, args, num_class=10):
     """
     compute mean IoU
     """
-    y_pred = y_pred.argmax(axis=1).flatten()
+    if args.prediction_only:
+        y_pred = y_pred.flatten()
+    else:
+        y_pred = y_pred.argmax(axis=1).flatten()
     y_true = y_true.flatten()
     current = confusion_matrix(y_true, y_pred, labels=range(num_class))
     intersection = np.diag(current)

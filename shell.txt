@@ -1,1 +1,4 @@
 python main.py --epochs 100 --train_data ./data/train --valid_data ./data/val --exp Test
+
+
+python main.py --prediction_only --prediction_data ./dataWithNoise/Noise*/pred/ --exp Noise*
