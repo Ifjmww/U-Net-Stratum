@@ -69,7 +69,7 @@ def train(args):
 
             # metrics，x指的是预测值，y指的是真实值，.detach()是切断反向传播、去除梯度
             x, y = output.detach().cpu().numpy(), y.detach().cpu().numpy()
-            iou_score = miou(y, x, args.num_class)
+            iou_score = miou(y, x, args, args.num_class)
 
             tot_iou += iou_score
             # 学习率更新
@@ -103,7 +103,7 @@ def train(args):
 
                 # metrics
                 x, y = output.detach().cpu().numpy(), y.cpu().numpy()
-                iou_score = miou(y, x, args.num_class)
+                iou_score = miou(y, x, args, args.num_class)
                 val_iou += iou_score
 
         if val_iou / len(test_loader) >= best_iou:
@@ -172,7 +172,7 @@ def evaluate(args):
             # metrics
             input = x.detach().cpu().numpy()
             x, y = output.detach().cpu().numpy(), y.cpu().numpy()
-            iou_score = miou(y, x, args.num_class)
+            iou_score = miou(y, x, args, args.num_class)
             val_iou += iou_score
 
             # x代表的是output
