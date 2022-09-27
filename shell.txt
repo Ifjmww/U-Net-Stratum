@@ -1,4 +1,11 @@
 python main.py --epochs 100 --train_data ./data/train --valid_data ./data/val --exp Test
 
 
-python main.py --prediction_only --prediction_data ./dataWithNoise/Noise*/pred/ --exp Noise*
+python main.py --prediction_only --prediction_data ./data/prediction/ --exp 0904_data
+python main.py --prediction_only --prediction_data ./dataWithNoise/Noise40/pred/ --exp Noise40#2
+python main.py --prediction_only --prediction_data ./dataWithNoise/Noise45/pred/ --exp Noise45#2
+python main.py --prediction_only --prediction_data ./dataWithNoise/Noise50/pred/ --exp Noise50#2
+
+python main.py --prediction_only --prediction_data ./dataWithNewLabel/pred/ --exp 0913_dataWithNewLabel
+
+

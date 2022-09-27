@@ -289,9 +289,11 @@ def prediction(args):
             print("segmentation results have been saved!!!")
             result = splicing(item, types, args)
             if types == 'crossline':
-                label_path = './dataRaw/crosslines/y/crossline_' + str((int(item.split('_')[-1]) - 1) * 50 + 325) + '_mask.png'
+                # label_path = './dataRaw/crosslines/y/crossline_' + str((int(item.split('_')[-1]) - 1) * 50 + 325) + '_mask.png'
+                label_path = 'D:/Test/pytorch/StratumDataProcess/dataWithNewLabel/crosslines/y/crossline_' + str((int(item.split('_')[-1]) - 1) * 50 + 325) + '_mask.png'
             else:
-                label_path = './dataRaw/inlines/y/inline_' + str((int(item.split('_')[-1]) - 1) * 50 + 125) + '_mask.png'
+                # label_path = './dataRaw/inlines/y/inline_' + str((int(item.split('_')[-1]) - 1) * 50 + 125) + '_mask.png'
+                label_path = 'D:/Test/pytorch/StratumDataProcess/dataWithNewLabel/inlines/y/inline_' + str((int(item.split('_')[-1]) - 1) * 50 + 125) + '_mask.png'
 
             label = Image.open(label_path)
             y = np.array(label)
@@ -303,6 +305,10 @@ def prediction(args):
         print(count, '===================================================================================')
     print(mIoU)
     print(np.mean(mIoU))
+    print('=================================')
+    for i in range(len(mIoU)):
+        print(mIoU[i])
+    print('=================================')
     np.save('./checkpoints/' + args.exp + '/pred/mIoU.npy', mIoU)
 
     # =======================================================================================================================================================
