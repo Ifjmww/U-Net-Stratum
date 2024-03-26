@@ -7,15 +7,16 @@ from PIL import Image
 
 
 def save_model(args, model):
-    integrate = '_int' if args.integrate else ''
-    weights = '_weights'
-    cpt_name = 'iter_' + str(args.iter) + '_mul_' + str(args.multiplier) + integrate + '_best' + weights + '.pt'
+    """
+    保存模型
+    """
+    cpt_name = 'UNet_best.pt'
     torch.save({'state_dict': model.state_dict()}, "checkpoints/" + args.exp + "/" + cpt_name)
 
 
 def get_flops(args, model):
     """
-    compute computations: MACs, #Params
+    计算复杂度
     """
 
     from ptflops import get_model_complexity_info
@@ -28,6 +29,9 @@ def get_flops(args, model):
 
 
 def display(args, length):
+    """
+    结果可视化
+    """
     path = "checkpoints/" + args.exp + "/outputs/segmentations/"
     if not os.path.exists("checkpoints/" + args.exp + "/outputs/images/"):
         os.mkdir("checkpoints/" + args.exp + "/outputs/images/")
@@ -71,7 +75,10 @@ def display(args, length):
 
 
 def splicing(filename, types, args):
-    # 将预测出的图片拼在一起
+    """
+    将预测出的图片拼在一起
+    """
+
     print('Splicing segmentations...')
     if not os.path.exists('./checkpoints/' + args.exp + '/pred/'):
         os.mkdir('./checkpoints/' + args.exp + '/pred/')

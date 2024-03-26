@@ -4,7 +4,7 @@ from sklearn.metrics import confusion_matrix
 
 def miou(y_true, y_pred, args, num_class=10):
     """
-    compute mean IoU
+    计算评价标准
     """
     if args.prediction_only:
         y_pred = y_pred.flatten()

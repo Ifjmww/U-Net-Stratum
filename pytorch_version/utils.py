@@ -25,15 +25,12 @@ def train(args):
     test_loader = DataLoader(dataset=test_set, batch_size=args.batch_size, shuffle=True, num_workers=0, drop_last=True,
                              pin_memory=True)
 
-    # create model
-    # model = UNet(iterations=args.iter, num_classes=args.num_class, num_layers=4, multiplier=args.multiplier, integrate=args.integrate).to(device).float()
     model = UNet(n_channels=1, n_classes=args.num_class).to(device)
     criterion = CrossEntropyLoss()
     optimizer = Adam(params=model.parameters(), lr=args.lr, weight_decay=0.)
 
     fcn = lambda step: 1. / (1. + args.lr_decay * step)
     scheduler = LambdaLR(optimizer, lr_lambda=fcn)
-    # scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.8)
 
     print('model successfully built and compiled.')
 
@@ -133,15 +130,12 @@ def evaluate(args):
                              pin_memory=True)
 
     if args.model_path is None:
-        integrate = '_int' if args.integrate else ''
-        weights = '_weights'
-        cpt_name = 'iter_' + str(args.iter) + '_mul_' + str(args.multiplier) + integrate + '_best' + weights + '.pt'
+        cpt_name = 'UNet_best.pt'
         model_path = "checkpoints/" + args.exp + "/" + cpt_name
     else:
         model_path = args.model_path
     print('Restoring model from path: ' + model_path)
-    # model = UNet(iterations=args.iter, num_classes=args.num_class, num_layers=4, multiplier=args.multiplier,
-    #              integrate=args.integrate).to(device)
+
     model = UNet(n_channels=1, n_classes=args.num_class).to(device)
     checkpoint = torch.load(model_path)
     model.load_state_dict(checkpoint['state_dict'])
@@ -239,9 +233,8 @@ def prediction(args):
         pred_loader = DataLoader(dataset=pred_set, batch_size=args.batch_size_pred, shuffle=False, num_workers=0, drop_last=True, pin_memory=True)
 
         if args.model_path is None:
-            integrate = '_int' if args.integrate else ''
-            weights = '_weights'
-            cpt_name = 'iter_' + str(args.iter) + '_mul_' + str(args.multiplier) + integrate + '_best' + weights + '.pt'
+
+            cpt_name = 'UNet_best.pt'
             model_path = "checkpoints/" + args.exp + "/" + cpt_name
         else:
             model_path = args.model_path
@@ -289,16 +282,13 @@ def prediction(args):
             print("segmentation results have been saved!!!")
             result = splicing(item, types, args)
             if types == 'crossline':
-                # label_path = './dataRaw/crosslines/y/crossline_' + str((int(item.split('_')[-1]) - 1) * 50 + 325) + '_mask.png'
-                label_path = 'D:/Test/pytorch/StratumDataProcess/dataWithNewLabel/crosslines/y/crossline_' + str((int(item.split('_')[-1]) - 1) * 50 + 325) + '_mask.png'
+                label_path = './dataRaw/crosslines/y/crossline_' + str((int(item.split('_')[-1]) - 1) * 50 + 325) + '_mask.png'
+
             else:
-                # label_path = './dataRaw/inlines/y/inline_' + str((int(item.split('_')[-1]) - 1) * 50 + 125) + '_mask.png'
-                label_path = 'D:/Test/pytorch/StratumDataProcess/dataWithNewLabel/inlines/y/inline_' + str((int(item.split('_')[-1]) - 1) * 50 + 125) + '_mask.png'
+                label_path = './dataRaw/inlines/y/inline_' + str((int(item.split('_')[-1]) - 1) * 50 + 125) + '_mask.png'
 
             label = Image.open(label_path)
             y = np.array(label)
-            # plt.imshow(y)
-            # plt.show()
             mIoU[count] = miou(y, result, args, args.num_class)
             print("prediction mIoU: ", mIoU[count])
         count += 1
@@ -311,4 +301,3 @@ def prediction(args):
     print('=================================')
     np.save('./checkpoints/' + args.exp + '/pred/mIoU.npy', mIoU)
 
-    # =======================================================================================================================================================
